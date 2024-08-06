@@ -1,13 +1,17 @@
 const std = @import("std");
 const stdout = std.io.getStdOut().writer();
 
-const color3 = struct {
+pub const color3 = struct {
     r: f32,
     g: f32,
     b: f32,
     rgb: bool, // scales -> [0, 255]
     hsv: bool, // scales -> [0, 255]
     norm: bool, // scales -> [0, 1]
+
+    pub fn init() color3 {
+        return color3{ .r = 0, .g = 0, .b = 0, .rgb = true, .hsv = false, .norm = false };
+    }
 
     pub fn init_rgb(r: f32, g: f32, b: f32) color3 {
         return color3{ .r = r, .g = g, .b = b, .rgb = true, .hsv = false, .norm = false };
@@ -149,19 +153,30 @@ const color3 = struct {
     }
 
     pub fn shift_(clr: *color3, sr: f32, sg: f32, sb: f32) void {
-        if (sr > 0) {
+        if (sr > 0 or sr < 0) {
             clr.r = clr.r + sr;
         }
-        if (sg > 0) {
+        if (sg > 0 or sg < 0) {
             clr.g = clr.g + sg;
         }
-        if (sb > 0) {
+        if (sb > 0 or sg < 0) {
             clr.b = clr.b + sb;
         }
     }
+
+    pub fn update_(clr: *color3, r: f32, g: f32, b: f32) void {
+        clr.r = r;
+        clr.g = g;
+        clr.b = b;
+    }
 };
 
-test "color3 initialization" {
+test "initialization" {
+    const c = color3.init();
+    try std.testing.expect(c.r == 0 and c.g == 0 and c.b == 0 and c.rgb and !c.hsv and !c.norm);
+}
+
+test "rgb initialization" {
     const c = color3.init_rgb(100, 200, 255);
     try std.testing.expect(c.r == 100 and c.g == 200 and c.b == 255 and c.rgb and !c.hsv and !c.norm);
 }
@@ -177,6 +192,10 @@ test "norm test" {
     try std.testing.expectEqual(c.r, 0);
     try std.testing.expectEqual(c.g, 0.5);
     try std.testing.expectEqual(c.b, 1.0);
+    color3.from_norm_(&c);
+    try std.testing.expectEqual(c.r, 0);
+    try std.testing.expectEqual(c.g, 127.5);
+    try std.testing.expectEqual(c.b, 255);
 }
 
 test "1: rgb -> hsv -> rgb" {
@@ -276,4 +295,29 @@ test "shift #2" {
     try std.testing.expectEqual(c.r, 0);
     try std.testing.expectEqual(c.g, 127.5);
     try std.testing.expectEqual(c.b, 255);
+}
+
+test "clamp #1" {
+    var c = color3.init_rgb(256, -1, 1000);
+    color3.clamp_(&c);
+    try std.testing.expectEqual(c.r, 255);
+    try std.testing.expectEqual(c.g, 0);
+    try std.testing.expectEqual(c.b, 255);
+}
+
+test "clamp #2" {
+    var c = color3.init_rgb(256, -1, 1000);
+    color3.to_norm_(&c);
+    color3.clamp_(&c);
+    try std.testing.expectEqual(c.r, 1);
+    try std.testing.expectEqual(c.g, 0);
+    try std.testing.expectEqual(c.b, 1);
+}
+
+test "update" {
+    var c = color3.init_rgb(0, 0, 0);
+    color3.update_(&c, 10, 20, 30);
+    try std.testing.expectEqual(c.r, 10);
+    try std.testing.expectEqual(c.g, 20);
+    try std.testing.expectEqual(c.b, 30);
 }
