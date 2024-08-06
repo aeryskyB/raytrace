@@ -135,6 +135,30 @@ const color3 = struct {
         clr.rgb = true;
         clr.hsv = false;
     }
+
+    pub fn clamp_(clr: *color3) void {
+        if (clr.norm) {
+            clr.r = @max(@min(clr.r, 1), 0);
+            clr.g = @max(@min(clr.g, 1), 0);
+            clr.b = @max(@min(clr.b, 1), 0);
+        } else {
+            clr.r = @max(@min(clr.r, 255), 0);
+            clr.g = @max(@min(clr.g, 255), 0);
+            clr.b = @max(@min(clr.b, 255), 0);
+        }
+    }
+
+    pub fn shift_(clr: *color3, sr: f32, sg: f32, sb: f32) void {
+        if (sr > 0) {
+            clr.r = clr.r + sr;
+        }
+        if (sg > 0) {
+            clr.g = clr.g + sg;
+        }
+        if (sb > 0) {
+            clr.b = clr.b + sb;
+        }
+    }
 };
 
 test "color3 initialization" {
@@ -233,5 +257,23 @@ test "9: rgb -> hsv -> rgb" {
     try color3.hsv_to_rgb_(&c);
     try std.testing.expectEqual(c.r, 255);
     try std.testing.expectEqual(c.g, 255);
+    try std.testing.expectEqual(c.b, 255);
+}
+
+test "shift #1" {
+    var c = color3.init_rgb(200, 150, 100);
+    color3.shift_(&c, 15, 20, 25);
+    try std.testing.expectEqual(c.r, 215);
+    try std.testing.expectEqual(c.g, 170);
+    try std.testing.expectEqual(c.b, 125);
+}
+
+test "shift #2" {
+    var c = color3.init_rgb(127.5, 127.5, 127.5);
+    color3.to_norm_(&c);
+    color3.shift_(&c, -0.5, 0, 0.5);
+    color3.from_norm_(&c);
+    try std.testing.expectEqual(c.r, 0);
+    try std.testing.expectEqual(c.g, 127.5);
     try std.testing.expectEqual(c.b, 255);
 }
