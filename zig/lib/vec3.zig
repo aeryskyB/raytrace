@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const vec3 = struct {
+pub const vec3 = struct {
     coord: @Vector(3, f32),
 
     pub fn init(x: f32, y: f32, z: f32) vec3 {
@@ -12,6 +12,12 @@ const vec3 = struct {
     pub fn add(v1: vec3, v2: vec3) vec3 {
         return vec3{
             .coord = v1.coord + v2.coord,
+        };
+    }
+
+    pub fn scale(v: vec3, t: f32) vec3 {
+        return vec3{
+            .coord = v.coord * @as(@Vector(3, f32), @splat(t)),
         };
     }
 
@@ -45,6 +51,13 @@ test "vec3 add" {
     const v3 = vec3.add(v1, v2);
     const v4 = vec3.init(12, 23, 34);
     try std.testing.expect(@reduce(.And, v3.coord == v4.coord));
+}
+
+test "scale" {
+    const v1 = vec3.init(10, 20, 30);
+    const v2 = vec3.scale(v1, 2);
+    const v3 = vec3.init(20, 40, 60);
+    try std.testing.expect(@reduce(.And, v2.coord == v3.coord));
 }
 
 test "length" {
