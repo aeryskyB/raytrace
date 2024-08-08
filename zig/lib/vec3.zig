@@ -9,9 +9,15 @@ pub const vec3 = struct {
         };
     }
 
-    pub fn add(v1: vec3, v2: vec3) vec3 {
+    pub fn add_v(v1: vec3, v2: vec3) vec3 {
         return vec3{
             .coord = v1.coord + v2.coord,
+        };
+    }
+
+    pub fn add_s(v: vec3, t: f32) vec3 {
+        return vec3{
+            .coord = v.coord + @as(@Vector(3, f32), @splat(t)),
         };
     }
 
@@ -45,12 +51,20 @@ test "initialization" {
     try std.testing.expectEqual(v.coord[2], 255);
 }
 
-test "vec3 add" {
+test "vector add" {
     const v1 = vec3.init(10, 20, 30);
     const v2 = vec3.init(2, 3, 4);
-    const v3 = vec3.add(v1, v2);
+    const v3 = vec3.add_v(v1, v2);
     const v4 = vec3.init(12, 23, 34);
     try std.testing.expect(@reduce(.And, v3.coord == v4.coord));
+}
+
+test "scalar add" {
+    const v1 = vec3.init(10, 20, 30);
+    const t: f32 = 10;
+    const v2 = vec3.add_s(v1, t);
+    const v3 = vec3.init(20, 30, 40);
+    try std.testing.expect(@reduce(.And, v2.coord == v3.coord));
 }
 
 test "scale" {

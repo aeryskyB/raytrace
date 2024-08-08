@@ -169,6 +169,38 @@ pub const color3 = struct {
         clr.g = g;
         clr.b = b;
     }
+
+    pub fn mix(clr1: color3, clr2: color3) color3 {
+        return color3.init_rgb(clr1.r + clr2.r, clr1.g + clr2.g, clr1.b + clr2.b);
+    }
+
+    pub fn scale_(clr: *color3, tr: f32, tg: f32, tb: f32) void {
+        if (tr > 1 or tr < 1) {
+            clr.r = clr.r * tr;
+        }
+        if (tg > 1 or tg < 1) {
+            clr.g = clr.g * tg;
+        }
+        if (tb > 1 or tb < 1) {
+            clr.b = clr.b * tb;
+        }
+    }
+
+    pub fn write_ppm_rgb_pxl(clr: color3) !void {
+        const ir: u8 = @as(u8, @intFromFloat(clr.r));
+        const ig: u8 = @as(u8, @intFromFloat(clr.g));
+        const ib: u8 = @as(u8, @intFromFloat(clr.b));
+
+        try stdout.print("{d} {d} {d}\n", .{ ir, ig, ib });
+    }
+
+    pub fn write_term_rgb_pxl(clr: color3) !void {
+        const ir: u8 = @as(u8, @intFromFloat(clr.r));
+        const ig: u8 = @as(u8, @intFromFloat(clr.g));
+        const ib: u8 = @as(u8, @intFromFloat(clr.b));
+
+        try stdout.print("\x1b[38;2;{d};{d};{d}m██", .{ ir, ig, ib });
+    }
 };
 
 test "initialization" {
@@ -320,4 +352,38 @@ test "update" {
     try std.testing.expectEqual(c.r, 10);
     try std.testing.expectEqual(c.g, 20);
     try std.testing.expectEqual(c.b, 30);
+}
+
+test "mix #1" {
+    const c1 = color3.init_rgb(10, 20, 30);
+    const c2 = color3.init_rgb(30, 20, 10);
+    var c3 = color3.mix(c1, c2);
+    color3.clamp_(&c3);
+    const c4 = color3.init_rgb(40, 40, 40);
+    try std.testing.expect(c3.r == c4.r and c3.g == c4.g and c3.b == c4.b);
+}
+
+test "mix #2" {
+    const c1 = color3.init_rgb(100, 200, 300);
+    const c2 = color3.init_rgb(30, 20, 10);
+    var c3 = color3.mix(c1, c2);
+    color3.clamp_(&c3);
+    const c4 = color3.init_rgb(130, 220, 255);
+    try std.testing.expect(c3.r == c4.r and c3.g == c4.g and c3.b == c4.b);
+}
+
+test "scale #1" {
+    var c1 = color3.init_rgb(10, 20, 30);
+    color3.scale_(&c1, 2, 2, 2);
+    color3.clamp_(&c1);
+    const c2 = color3.init_rgb(20, 40, 60);
+    try std.testing.expect(c1.r == c2.r and c1.g == c2.g and c1.b == c2.b);
+}
+
+test "scale #2" {
+    var c1 = color3.init_rgb(100, 200, 300);
+    color3.scale_(&c1, 2, 2, 2);
+    color3.clamp_(&c1);
+    const c2 = color3.init_rgb(200, 255, 255);
+    try std.testing.expect(c1.r == c2.r and c1.g == c2.g and c1.b == c2.b);
 }

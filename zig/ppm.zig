@@ -44,7 +44,6 @@ pub fn main() !void {
             ib = @as(u8, @intFromFloat(clr.b));
 
             try stdout.print("{d} {d} {d}\n", .{ ir, ig, ib });
-            try stdout.print("\x1b[38;2;{d};{d};{d}m██", .{ ir, ig, ib });
         }
     }
 
@@ -64,7 +63,6 @@ pub fn main() !void {
             ib = @as(u8, @intFromFloat(clr.b));
 
             try stdout.print("{d} {d} {d}\n", .{ ir, ig, ib });
-            try stdout.print("\x1b[38;2;{d};{d};{d}m██", .{ ir, ig, ib });
         }
 
         for (0..img_width) |i| {
