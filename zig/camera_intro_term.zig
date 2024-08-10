@@ -29,7 +29,7 @@ pub fn main() !void {
 
     const vp_up_left: vec3 = vec3.add_v(vec3.add_v(camera_o, vec3.init(0, 0, -focal_len)), vec3.add_v(vec3.scale(vp_u, -0.5), vec3.scale(vp_v, -0.5)));
 
-    const pixel_up_left_loc: vec3 = vec3.add_v(vp_up_left, vec3.add_s(vec3.add_v(pxl_delta_u, pxl_delta_v), 0.5));
+    const pixel_up_left_loc: vec3 = vec3.add_v(vp_up_left, vec3.scale(vec3.add_v(pxl_delta_u, pxl_delta_v), 0.5));
     var pxl_v: vec3 = undefined;
     var pxl: vec3 = undefined;
     var ray_dir: vec3 = undefined;
